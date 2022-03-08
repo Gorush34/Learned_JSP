@@ -1,0 +1,295 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<%@ page import="chap03.MemberDTO" %>  
+    
+<%
+	// == MemberDTO  객체 생성하기 == //
+	MemberDTO mbr1 = new MemberDTO();
+	mbr1.setName("이순신");
+	mbr1.setJubun("9703081234567");
+	
+	String name1 = mbr1.getName();
+	String jubun1 = mbr1.getJubun();
+	String gender1 = mbr1.getGender();
+	int age1 = mbr1.getAge();
+	
+	MemberDTO mbr2 = new MemberDTO("엄정화", "9703082234567");
+	String name2 = mbr2.getName();
+	String jubun2 = mbr2.getJubun();
+	String gender2 = mbr2.getGender();
+	int age2 = mbr2.getAge();
+%>    
+    
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSP 표준액션 중 useBean 에 대해서 알아봅니다.</title>
+</head>
+<body>
+	<div>
+		<h2>스크립틀릿을 사용하여 MemberDTO 클래스의 객체정보 불러오기</h2>
+		
+		<ul>
+			<li>성명 : <%= name1%></li>
+			<li>주민번호 : <%= jubun1%></li>
+			<li>성별 : <%= gender1%></li>
+			<li>나이 : <%= age1%></li>
+		</ul>
+		
+		<br/>
+		
+		<ul>
+			<li>성명 : <%= name2%></li>
+			<li>주민번호 : <%= jubun2%></li>
+			<li>성별 : <%= gender2%></li>
+			<li>나이 : <%= age2%></li>
+		</ul>
+		
+	</div>
+	
+	<hr style="border: solid 1px red;">
+	
+	<div>
+		<h2>JSP 표준액션 중 useBean을 사용하여 MemberDTO 클래스의 객체정보 불러오기</h2>
+		<jsp:useBean id="mbr3" class="chap03.MemberDTO" />
+		<%-- 위의 것은 이렇다.
+			chap03.MemberDTO mbr3 = new chap03.MemberDTO(); // 기본생성자
+			즉, chap03.MemberDTO 클래스의 기본생성자로 mbr3 이라는 객체를 생성하는 것이다.	
+		 --%>
+		 <jsp:setProperty property="name" name="mbr3" value="김태희" />
+		 <%--
+		 		위의 것은 아래의 뜻이다.
+		 		mbr3.setName("김태희"); 와 같은 것이다.
+		 --%>
+		 
+		 <jsp:setProperty property="jubun" name="mbr3" value="8903082234567" />
+		 <%--
+		 		위의 것은 아래의 뜻이다.
+		 		mbr3.setJubun("8903082234567"); 와 같은 것이다.
+		 --%>
+		 
+		 
+		 <ul>
+			<li>성명 : <jsp:getProperty property="name" name="mbr3"/></li>
+			<li>주민번호 : <jsp:getProperty property="jubun" name="mbr3"/></li>
+			<li>성별 : <jsp:getProperty property="gender" name="mbr3"/></li>
+			<li>나이 : <jsp:getProperty property="age" name="mbr3"/></li>
+		</ul>
+		 
+		 
+	</div>
+	
+	
+	
+</body>
+</html>
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+    
+<%
+	// 컨텍스트 패스명(context path name)을 알아오고자 한다.
+	String ctxPath = request.getContextPath();
+	
+	// System.out.println("ctxPath => " + ctxPath);
+	// ctxPath => // ctxPath => /JSPServletBegin     <== WAS(톰캣서버) Document Base Path 설정의 기본값임.
+    // ctxPath => /aaa                 <== WAS(톰캣서버) Document Base Path 설정을  /aaa 으로 변경한 경우임. 
+    // ctxPath =>     (아무글자도 없는 것임) <== WAS(톰캣서버) Document Base Path 설정을  / 으로 변경한 경우임.
+
+%>    
+    
+    
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>POST 방식으로 데이터 전송하기</title>
+
+<style type="text/css">
+	ul {list-style-type: none;}
+	li {line-height: 200%;}
+</style>
+
+<script type="text/javascript" src="<%= ctxPath%>/js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+
+	$(document).ready(function(){
+		
+		// === 유효성 검사 === //
+		/*
+		$("form[name='memberFrm']").submit(function(){
+			
+		});
+		*/
+		
+		// 또는 
+		
+		$("form[name='memberFrm']").submit(() => {
+			
+			// 1. 성명은 필수입력 검사
+			const name_length = $("input:text[name='name']").val().trim().length;
+			
+			if(name_length == 0) {
+				alert("성명을 입력하세요!!");
+				$("input:text[name='name']").val("").focus();
+				return false; // 중요******  submit 을 하지 않고 종료한다.
+			}
+			
+			// 2. 학력은 필수입력 검사
+			const school_value = $("select[name='school']").val();
+			if(school_value == "") {
+				alert("학력을 선택하세요!!");
+				return false; // 중요******  submit 을 하지 않고 종료한다.
+			} 
+			
+			// 3. 색상은 필수입력 검사
+			const color_checked_length = $("input:radio[name='color']:checked").length;
+			if(color_checked_length == 0) {
+				alert("색상을 선택하세요!!");
+				return false; // 중요******  submit 을 하지 않고 종료한다.
+			} 
+			
+			// 4. 음식은 필수입력 검사
+			const food_checked_length = $("input:checkbox[name='food']:checked").length;
+			if(food_checked_length == 0) {
+				alert("선호음식을 1개만 선택하세요!!");
+				return false; // 중요******  submit 을 하지 않고 종료한다.
+			}
+			
+		}); // end of $("form[name='memberFrm']").submit(() => {})--------------------
+		
+	});
+
+</script>
+
+</head>
+<body>
+
+	<form name="memberFrm" action="<%= ctxPath%>/chap03_StandardAction/06_useBeanForm_Register_02.jsp" method="post">
+	  
+		<fieldset>
+		      <legend>개인성향 테스트(GET method)</legend>
+		      <ul>
+		         <li>
+		            <label for="name">성명</label>
+		            <input type="text" name="name" id="name" placeholder="성명입력"/> 
+		         </li>
+		         <li>
+		            <label for="school">학력</label>
+		            <select name="school" id="school">
+		               <option value="">학력선택</option>
+		               <option>고졸</option>
+		               <option>초대졸</option>
+		               <option>대졸</option>
+		               <option>대학원졸</option>
+		            </select>
+		         </li>
+		         <li>
+		            <label for="">좋아하는 색상</label>
+		            <div>
+		               <label for="red">빨강</label>
+		               <input type="radio" name="color" id="red" value="red" />
+		               
+		               <label for="blue">파랑</label>
+		               <input type="radio" name="color" id="blue" value="blue" />
+		               
+		               <label for="green">초록</label>
+		               <input type="radio" name="color" id="green" value="green" />
+		               
+		               <label for="yellow">노랑</label>
+		               <input type="radio" name="color" id="yellow" value="yellow" />
+		            </div>
+		         </li>
+		         <li>
+		            <label for="">좋아하는 음식(다중선택)</label>
+		            <div>
+		                <label for="food1">짜장면</label>
+		               <input type="checkbox" name="food" id="food1" value="짜짱면" />
+		               &nbsp;
+		               
+		               <label for="food2">짬뽕</label>
+		               <input type="checkbox" name="food" id="food2" value="짬뽕" />
+		               &nbsp;
+		               
+		               <label for="food3">탕수육</label>
+		               <input type="checkbox" name="food" id="food3" value="탕수육" />
+		               &nbsp;
+		               
+		               <label for="food4">양장피</label>
+		               <input type="checkbox" name="food" id="food4" value="양장피" />
+		               &nbsp;
+		               
+		               <label for="food5">팔보채</label>
+		               <input type="checkbox" name="food" id="food5" value="팔보채" />
+		            </div>
+		         </li>
+		         <li>
+		            <input type="submit" value="전송" />
+		            <input type="reset" value="취소" />
+		         </li>
+		      </ul>
+	   </fieldset>
+	</form>
+
+</body>
+</html>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form 태그를 사용한 데이터 전송시 useBean 을 사용하여 결과 보여주기</title>
+</head>
+<body>
+
+	<h2>개인성향 입력 결과 정보(JSP 표준액션 중 useBean 을 사용한 것)</h2>
+	
+	<jsp:useBean id="psdto" class="chap03.PersonDTO" />
+	<jsp:setProperty property="name" name="psdto" value="${param.name}" />
+	<jsp:setProperty property="school" name="psdto" value="${param.school}" />
+	<jsp:setProperty property="color" name="psdto" value="${param.color}" />
+	<jsp:setProperty property="food" name="psdto" value="${paramValues.food}" />
+	
+
+	<ul>
+		<li>성명 : <jsp:getProperty property="name" name="psdto"/> </li>
+		<li>학력 : <jsp:getProperty property="school" name="psdto"/> </li>
+		<li>색상 : <jsp:getProperty property="color" name="psdto"/> </li>
+		<li>음식 : <jsp:getProperty property="strFood" name="psdto"/> </li>
+	</ul>
+
+	<br/>
+	<hr style="border: solid 1px red;">
+	<br/>
+	
+	
+	<jsp:useBean id="psdto_2" class="chap03.PersonDTO" />
+	<jsp:setProperty property="*" name="psdto_2" />
+	<%--
+			위와 같이 <jsp:setProperty property="*" name="psdto_2" /> 을 사용하기 위한 전제조건은
+			chap03.PersonDTO 클래스에 set***() 메소드의 *** 이름과 form 태그에서
+			전달되어져 오는 name 값이 같아야 한다.
+			예) setName 의 name 과 form 태그의 name=name
+			    setFood 의 food 와 form 태그의 name=food
+	
+	 --%>
+	
+	<ul>
+		<li>성명 : <jsp:getProperty property="name" name="psdto_2"/> </li>
+		<li>학력 : <jsp:getProperty property="school" name="psdto_2"/> </li>
+		<li>색상 : <jsp:getProperty property="color" name="psdto_2"/> </li>
+		<li>음식 : <jsp:getProperty property="strFood" name="psdto_2"/> </li>
+	</ul>
+
+</body>
+</html>
