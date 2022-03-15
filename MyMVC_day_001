@@ -308,3 +308,16 @@ public class FrontController extends HttpServlet {
 
 }
 
+
+/*
+ *.up치면 서블릿이 응답하고 init가 최초 실행 
+
+cmdMap으로 command.properties에 있는 key value값을 저장
+
+웹브라우저 주소창에서 가져온 key값으로 map에 저장되어진 객체 불러옴
+// 그러기 위해 인터페이스 추상클래스 생성
+// 우리끼리의 약속으로 boolean 생성 후 false면 url 주소 그대로, true면 redirect로 up으로 변경
+
+action.execute로 메소드 값을 끌어오고
+boolean / viewpage 가져옴 그에 따라 주소 변경 => 데이터 전달방식 변경 
+*/
