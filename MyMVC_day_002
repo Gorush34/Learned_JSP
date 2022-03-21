@@ -1,0 +1,100 @@
+//// === 아이디중복검사 하기 === ////
+     $("img#idcheck").click( ()=>{
+    	 
+    	  b_flagIdDuplicatClick = true;
+    	  // 가입하기 버튼 클릭시 "아이디중복확인" 을 클릭했는지 클릭안했는지를 알아보기위한 용도임.
+    	  
+    	  // 입력하고자 하는 아이디가 데이터베이스 테이블에 존재하는지 존재하지 않는지 알아와야 한다.
+    	  /*
+           	Ajax (Asynchronous JavaScript and XML)란?
+		    ==> 이름만 보면 알 수 있듯이 '비동기 방식의 자바스크립트와 XML' 로서
+		        Asynchronous JavaScript + XML 인 것이다.
+		        한마디로 말하면, Ajax 란? Client 와 Server 간에 XML 데이터를 JavaScript 를 사용하여 비동기 통신으로 주고 받는 기술이다.
+		        하지만 요즘에는 데이터 전송을 위한 데이터 포맷방법으로 XML 을 사용하기 보다는 JSON 을 더 많이 사용한다.
+		        참고로 HTML은 데이터 표현을 위한 포맷방법이다.
+		        그리고, 비동기식이란 어떤 하나의 웹페이지에서 여러가지 서로 다른 다양한 일처리가 개별적으로 발생한다는 뜻으로서, 
+		        어떤 하나의 웹페이지에서 서버와 통신하는 그 일처리가 발생하는 동안 일처리가 마무리 되기전에 또 다른 작업을 할 수 있다는 의미이다.
+          */
+    	  
+    	  // ==== jQuery 를 이용한 Ajax (Asynchronous JavaScript and XML) 처리하기 ==== //
+          $.ajax({
+        	  		url:"<%= ctxPath%>/member/idDuplicateCheck.up",
+        	  		data:{"userid":$("input#userid").val()}, // data 는 /MyMVC/member/idDuplicateCheck.up 로 전송할 데이터를 말한다.
+        	  		type:"post", // type 은 생략하면 "get" 이다.
+        	  //	async:false, // 동기처리(순서대로 처리함 / 지도에서는 꼭 동기처리로 해야 한다.)
+        	     	async:true, // 비동기처리(기본값임)
+        	  		success:function(text){
+        	  			
+        	  			// console.log("확인용 : text => " + text); 
+        	  			// 확인용 : text => {"isExist":false}
+        	  			// console.log("확인용 타입 typeof(text) => " + typeof(text) );
+        	  			// 확인용 타입 typeof(text) => string
+        	  			
+        	  			const json = JSON.parse(text);
+        	  			// JSON.parse(text); 은 JSON 형식으로 되어진 문자열을 자바스크립트 객체로 변환해주는 것이다.
+                        // 조심할 것은 text 는 반드시 JSON 형식으로 되어진 문자열이어야 한다.
+                        
+                        // console.log("확인용 : json => " + json); 
+        	  			// 확인용 : json => [object Object]
+        	  			// console.log("확인용 타입 typeof(json) => " + typeof(json) );
+        	  			// 확인용 타입 typeof(json) => object
+        	  			
+        	  			// console.log("확인용 => " + json.isExist );
+        	  			// 확인용 => false
+        	  			
+        	  			if(json.isExist) {
+        	  				// 입력한 $("input#userid").val() 값이 이미 사용중이라면
+        	  				$("span#idcheckResult").html($("input#userid").val()+" 은 중복된 ID 이므로 사용불가합니다.").css("color","orange");	
+        	  				
+        	  			}
+        	  			else {
+        	  			// 입력한 $("input#userid").val() 값이 DB tbl_member 테이블에 존재하지 않는 경우라면
+        	  				$("span#idcheckResult").html($("input#userid").val()+" 은 사용가능합니다.").css("color","green");
+        	  			}
+        	  			
+        	  		},
+        	  		error:function(request, status, error){
+        	  			alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+        	  		}
+        	  			
+          }); 
+          
+     });
+     
+     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    // ==== jQuery 를 이용한 Ajax (Asynchronous JavaScript and XML) 처리하기 ==== //
+      $.ajax({
+    	  		url:"<%= ctxPath%>/member/emailDuplicateCheck.up",
+    	  		data:{"email":$("input#email").val()}, // data 는 /MyMVC/member/emailDuplicateCheck.up 로 전송할 데이터를 말한다.
+    	  		type:"post", // type 은 생략하면 "get" 이다.
+    	  	//	async:false, // 동기처리
+          	 	async:true, // 비동기처리(기본값임)
+    	  		dataType:"json", // 데이터타입을 자동적으로 json으로 받아온다.
+    	  		success:function(json){
+    	  			
+    	  			// console.log("확인용 json => " + json);
+    	  			// 확인용 json => [object Object]
+    	  			// console.log("확인용 typeof(json) => " + typeof(json));
+    	  			// 확인용 typeof(json) => object
+    	  			
+    	  			if(json.isExist) {
+    	  				// 입력한 $("input#email").val() 값이 이미 사용중이라면
+    	  				$("span#emailCheckResult").html($("input#email").val()+" 은 중복된 ID 이므로 사용불가합니다.").css("color","red");	
+    	  				
+    	  			}
+    	  			else {
+    	  			// 입력한 $("input#email").val() 값이 DB tbl_member 테이블에 존재하지 않는 경우라면
+    	  				$("span#emailCheckResult").html($("input#email").val()+" 은 사용가능합니다.").css("color","navy");
+    	  			}
+    	  			
+    	  		},
+    	  		error:function(request, status, error){
+    	  			alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+    	  		}
+    	  	  		
+      });  
+             
+  }
