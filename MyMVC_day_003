@@ -1,0 +1,226 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<style type="text/css">
+	
+	table#loginTbl {
+      width: 95%;
+      border: solid 1px gray;
+      border-collapse: collapse;
+      margin-top: 20px;
+   }
+   
+   table#loginTbl #th {
+      background-color: silver;
+      font-size: 14pt;
+      text-align: center;
+      height: 30px;
+   }
+   
+   table#loginTbl td {
+      border: solid 1px gray;
+      line-height: 30px;
+   }
+	
+</style>
+
+<script type="text/javascript">
+
+	$(document).ready(function(){
+		
+		$("button#btnSubmit").click(function(){
+			goLogin(); // 로그인을 시도한다.
+		}); 
+		
+		$("input#loginPwd").bind("keydown", function(event){
+			// keydown시 발생하는 함수
+			if(event.keyCode == 13) { // 암호입력란에 엔터를 했을 경우
+				goLogin(); // 로그인을 시도한다.
+			}
+		});
+
+		
+	}); // end of $(document).ready(function(){})--------------------------------
+
+	// Function Declaration
+	
+	// === 로그인 처리 함수 === // 
+	function goLogin(){
+		
+		const loginUserid = $("input#loginUserid").val().trim();
+		const loginPwd = $("input#loginPwd").val().trim();
+		
+		if(loginUserid == "") {
+			alert("아이디를 입력하세요!");
+			$("input#loginUserid").val("");
+			$("input#loginUserid").focus();
+			return;
+		}
+		
+		if(loginPwd == "") {
+			alert("비밀번호를 입력하세요!");
+			$("input#loginPwd").val("");
+			$("input#loginPwd").focus();
+			return;
+		}
+		
+		const frm = document.loginFrm;
+		frm.action = "<%= request.getContextPath()%>/login/login.up";
+		frm.method = "post";
+		frm.submit();
+		
+	} // end of function goLogin(){}------------------------
+	
+	
+</script>
+
+<%-- 로그인을 하기 위한 폼을 생성 --%>
+<form name="loginFrm">
+	<table id="loginTbl">
+		<thead>
+			<tr>
+				<th colspan="2" id="th">LOGIN</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+               <td style="width: 20%; border-bottom: hidden; border-right: hidden; padding: 10px;">ID</td>
+               <td style="width: 80%; border-bottom: hidden; border-left: hidden; padding: 10px;"><input type="text" id="loginUserid" name="userid" size="20" class="box" autocomplete="off" /></td>
+            </tr>   
+            <tr>
+               <td style="width: 20%; border-top: hidden; border-bottom: hidden; border-right: hidden; padding: 10px;">암호</td>
+               <td style="width: 80%; border-top: hidden; border-bottom: hidden; border-left: hidden; padding: 10px;"><input type="password" id="loginPwd" name="pwd" size="20" class="box" /></td>
+            </tr>
+            
+            <%-- === 아이디 찾기, 비밀번호 찾기 === --%>
+            <tr>
+               <td colspan="2" align="center">
+                  <a style="cursor: pointer;" data-toggle="modal" data-target="#userIdfind" data-dismiss="modal">아이디찾기</a> /
+                  <a style="cursor: pointer;" data-toggle="modal" data-target="#passwdFind" data-dismiss="modal" data-backdrop="static">비밀번호찾기</a>
+               </td>
+            </tr>
+            
+            <tr>
+               <td colspan="2" align="center" style="padding: 10px;">
+                  <input type="checkbox" id="saveid" name="saveid" /><label for="saveid">아이디저장</label>
+                  <%--
+                  <button type="button" id="btnSubmit" style="width: 67px; height: 27px; background-image: url('<%= request.getContextPath()%>/images/login.png'); vertical-align: middle; border: none;"></button>
+               	   --%>
+                   <button type="button" id="btnSubmit" class="btn btn-primary btn-sm ml-5">로그인</button>
+               
+               </td>
+            </tr>
+		</tbody>
+	
+	</table>
+</form>
+
+<%-- 로그인 되어진 화면 --%>
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package member.controller;
+
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import common.controller.AbstractController;
+import member.model.InterMemberDAO;
+import member.model.MemberDAO;
+import member.model.MemberVO;
+
+public class LoginAction extends AbstractController {
+
+	@Override
+	public void execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String method = request.getMethod(); // "GET" 또는 "POST"
+		
+		if(!"POST".equalsIgnoreCase(method)) {
+			// POST 방식으로 넘어온 것이 아니라면
+			
+			String message = "비정상적인 경로로 들어왔습니다.";	// 페이지 출력해주기
+			String loc = "javascript:history.back()";	// 페이지 이동
+			
+			request.setAttribute("message", message);
+			request.setAttribute("loc", loc);
+			
+		//	super.setRedirect(false);
+			super.setViewPage("/WEB-INF/msg.jsp");
+			
+		}
+		else {
+			// POST 방식으로 넘어온 것이라면
+			String userid = request.getParameter("userid");
+			String pwd = request.getParameter("pwd");
+			
+			// ==> 클라이언트의 IP 주소를 알아오는 것 <== //
+			String clientip = request.getRemoteAddr();
+			// C:\NCS\workspace(jsp)\MyMVC\src\main\webapp\JSP 파일을 실행시켰을 때 IP 주소가 제대로 출력되기위한 방법.txt 을 참조할 것
+			
+			System.out.println(">> 확인용 clientip => " + clientip);
+			// >> 확인용 clientip => 127.0.0.1
+			// >> 확인용 clientip => 192.168.0.4 (이건 폰 IP / 192.168.0.5 는 내 노트북IP)
+			
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("userid", userid);
+			paraMap.put("pwd", pwd);
+			paraMap.put("clientip", clientip);
+			
+			InterMemberDAO mdao = new MemberDAO(); 
+			
+			MemberVO loginuser = mdao.selectOneMember(paraMap);
+			
+		}
+
+	}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  MemberDAO 중 이메일 중복검사(암호화때문에 수정해야함)
+  
+  // email 중복검사 (tbl_member 테이블에서 email 가 존재하면 true를 리턴해주고, userid 가 존재하지 않으면 false를 리턴한다)
+	@Override
+	public boolean emailDuplicateCheck(String email) throws SQLException {
+		
+		boolean isExist = false;
+		
+		try {
+			conn = ds.getConnection();
+			
+			String sql = " select * "
+					   + " from tbl_member "
+					   + " where email = ? ";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, aes.encrypt(email)); // 암호화된 데이터를 비교해줘야 하기 때문에 이렇게 해야 함!!!
+			// 이렇게 하지 않으면 이메일 중복안된다고 하면서 막상 가입하면 SQL 오류남
+			
+			rs = pstmt.executeQuery();
+			
+			isExist = rs.next(); // 행이 있으면(중복된 userid) true, 
+								 // 행이 없으면(사용가능한 userid) false 이다.
+			
+			
+		} catch (GeneralSecurityException | UnsupportedEncodingException e) { 
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return isExist;
+		
+	}
+
