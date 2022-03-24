@@ -1,0 +1,263 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<%
+    String ctxPath = request.getContextPath();
+    //    /MyMVC
+%>
+
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" type="text/css" href="<%= ctxPath%>/bootstrap-4.6.0-dist/css/bootstrap.min.css" > 
+
+<!-- Font Awesome 5 Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- 직접 만든 CSS -->
+<link rel="stylesheet" type="text/css" href="<%= ctxPath%>/css/style.css" />
+
+<!-- Optional JavaScript -->
+<script type="text/javascript" src="<%= ctxPath%>/js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="<%= ctxPath%>/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js" ></script>
+
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		
+		const method = "${requestScope.method}"; 
+		// console.log("method => " + method);
+		
+		if( method == "GET" ) {
+			$("div#div_findResult").hide();
+		}
+		else if(method == "POST") {
+			$("input#name").val("${requestScope.name}");
+			$("input#email").val("${requestScope.email}");
+			
+		}
+		
+		$("button#btnFind").click(function(){
+			goFind();
+		});
+		
+		$("input#email").bind("keydown", function(event){
+			// keydown시 발생하는 함수
+			if(event.keyCode == 13) { // 암호입력란에 엔터를 했을 경우
+				goFind();
+			}
+		});
+		
+	}); // $(document).ready(function(){})-------------------------
+	
+	// Function Declaration
+	function goFind() {
+		// 성명 및 이메일에 대한 유효성 검사(정규표현식)은 생략함(전에 배우던 거에 있음)
+		const frm = document.idFindFrm;
+		frm.action = "<%= ctxPath%>/login/idFind.up";
+		frm.method = "post"; 
+		frm.submit(); // "POST" 방식으로 보내준다
+	} // end of function goFind()-------------------------------
+
+</script>
+
+
+
+<form name="idFindFrm">
+   
+   <ul style="list-style-type: none">
+         <li style="margin: 25px 0">
+            <label for="name" style="display: inline-block; width: 90px">성명</label>
+            <input type="text" name="name" id="name" size="25" placeholder="홍길동" autocomplete="off" required />
+         </li>
+         <li style="margin: 25px 0">
+            <label for="email" style="display: inline-block; width: 90px">이메일</label>
+            <input type="text" name="email" id="email" size="25" placeholder="abc@def.com" autocomplete="off" required />
+         </li>
+   </ul>
+   
+   <div class="my-3">
+    <p class="text-center">
+       <button type="button" class="btn btn-success" id="btnFind">찾기</button>
+    </p>
+   </div>
+   
+   <div class="my-3" id="div_findResult">
+        <p class="text-center">
+           ID : <span style="color: red; font-size: 16pt; font-weight: bold;">${requestScope.userid}</span> 
+      </p>
+   </div>
+   
+</form>
+
+///// end of idFind.jsp
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package member.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import common.controller.AbstractController;
+import member.model.*;
+
+public class IdFindAction extends AbstractController {
+
+	@Override
+	public void execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String method = request.getMethod(); // "GET" 또는 "POST"
+		
+		if("POST".equalsIgnoreCase(method)) {
+			// 아이디 찾기 모달창에서 "찾기" 버튼을 클릭했을 경우
+		
+			String name = request.getParameter("name");
+			String email = request.getParameter("email");	
+			
+			InterMemberDAO mdao = new MemberDAO();
+			
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("name", name);
+			paraMap.put("email", email);
+			
+			String userid = mdao.findUserid(paraMap);
+			
+			if(userid != null) {
+				request.setAttribute("userid", userid);
+			}
+			else {
+				request.setAttribute("userid", "존재하지 않습니다.");
+			}
+			
+			request.setAttribute("name", name);
+			request.setAttribute("email", email);
+			
+			
+			
+		} // end of if("POST".equalsIgnoreCase(method))-----------------
+		
+		request.setAttribute("method", method);
+		
+		// super.setRedirect(false);
+		super.setViewPage("/WEB-INF/login/idFind.jsp");
+		
+	}
+
+}
+
+
+
+
+///// end of idFind.jsp
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package member.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import common.controller.AbstractController;
+import member.model.*;
+
+public class IdFindAction extends AbstractController {
+
+	@Override
+	public void execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String method = request.getMethod(); // "GET" 또는 "POST"
+		
+		if("POST".equalsIgnoreCase(method)) {
+			// 아이디 찾기 모달창에서 "찾기" 버튼을 클릭했을 경우
+		
+			String name = request.getParameter("name");
+			String email = request.getParameter("email");	
+			
+			InterMemberDAO mdao = new MemberDAO();
+			
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("name", name);
+			paraMap.put("email", email);
+			
+			String userid = mdao.findUserid(paraMap);
+			
+			if(userid != null) {
+				request.setAttribute("userid", userid);
+			}
+			else {
+				request.setAttribute("userid", "존재하지 않습니다.");
+			}
+			
+			request.setAttribute("name", name);
+			request.setAttribute("email", email);
+			
+			
+			
+		} // end of if("POST".equalsIgnoreCase(method))-----------------
+		
+		request.setAttribute("method", method);
+		
+		// super.setRedirect(false);
+		super.setViewPage("/WEB-INF/login/idFind.jsp");
+		
+	}
+
+}
+
+
+
+
+///// end of IdFindAction.java
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 아이디 찾기(성명, 이메일을 입력받아서 해당 사용자의 아이디를 알려준다.
+	@Override
+	public String findUserid(Map<String, String> paraMap) throws SQLException {
+		
+		String userid = null;
+		
+		try {
+			conn = ds.getConnection();
+			
+			String sql = " select userid "
+					   + " from tbl_member "
+					   + " where status = 1 and name = ? and email = ? ";
+			// 여기 잘못됨
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, paraMap.get("name"));
+			pstmt.setString(2, aes.encrypt(paraMap.get("email")));
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				userid = rs.getString(1);
+			}
+			
+			
+			
+		} catch (GeneralSecurityException | UnsupportedEncodingException e) { 
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		
+		return userid;
+	}
+  
+///// end of public String findUserid(Map<String, String> paraMap) in MemberDAO
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
