@@ -1,0 +1,48 @@
+22.3.25
+
+@member.controller.GoogleMail.java
+(1) 카톡 붙여넣기
+(2) import java.util.Properties;
+(3) sendmail의 parameter 해석
+(4) prop.put("mail.smtp.user", "구글계정명@gmail.com");에서 구글계정명에 넣기
+(5) MySMTPAuthenticator 만들기 (부모클래스 Authenticator <= javax.mail 임을 유의하자!)
+
+@member.controller.MySMTPAuthenticator
+(1) 오버라이딩
+(2) import javax.mail.PasswordAuthentication;
+(3) return new PasswordAuthentication("구글계정명","앱비밀번호"); 입력
+
+@member.controller.GoogleMail.java
+(1) import javax.mail.*;
+(2) import javax.mail.internet.MimeMessage;
+(3) import javax.mail.internet.InternetAddress;
+(4) 보내는 사람의 메일주소 설정
+
+@member.controller.PwdFindAction.java
+(1) 구글 메일 객체 만들기
+GoogleMail mail = new GoogleMail();
+(2) mail.sendmail(email, certificationCode);
+(3) (2) 를 예외처리해준다.
+(4) try 문에    sendMailSuccess = true;
+    catch 문에 sendMailSuccess = false;
+(5) 세션을 불러온다.
+HttpSession session = request.getSession();
+(6) import javax.servlet.http.HttpSession;
+(7) 세션에 저장시킨다.
+session.setAttribute("certificationCode", certificationCode);
+
+메일이 전송되는지 확인해보자
+@WAS재구동
+@console clear
+
+
+
+@web browser 띄워서 MyMVC와 가입했던 이메일 주소의 계정 접속해놓기
+
+@MyMVC
+(1) 비밀번호 찾기
+
+@console을 보면 뭐라고 나옴 => 정상작동하는 중
+
+@naver 메일
+인증코드가 왔다!
